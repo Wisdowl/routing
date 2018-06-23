@@ -1,47 +1,11 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <vector>
-#include<deque>
-#include<stack>
-
-#define INT_MAX 999999
-
 using namespace std;
-
-struct node{
-	int recur;
-	int index;
-	int visited;
-	float dist;//DISTANCIA MINIMA ENTRE A ORIGEM ATE OS PONTOS
-	int prev;//ANTERIOR
-	vector<float> *custo;
-	vector<struct node*> *adj;
-};
-typedef struct node Node;
-
-struct grafo{
-		int m;
-		vector<Node*> vertices;
-};
-
-typedef struct grafo Grafo;
-
-struct caminhos{
-
-	deque< deque<int>* > *c;
-	deque<float> *custos;
-	int tam;
-
-
-};typedef struct caminhos Caminhos;
-
 
 Grafo* criaGrafo(){
 
 	Grafo *g = (Grafo*) malloc (sizeof(Grafo));
 	g->m = 0;
 
-	return g; 
+	return g;
 
 }
 
@@ -71,7 +35,7 @@ Node* addNode(Grafo *g, int index){
 	}
 
 	return NULL;
-	
+
 }
 
 
@@ -106,7 +70,7 @@ void removeNode(Grafo *g, int index){
 }
 
 void addArcoPonderado(Grafo *g, int i, int j, float custo){
-	
+
 	Node *node_i = buscaNode(g, i);
 	Node *node_j = buscaNode(g, j);
 
@@ -127,7 +91,7 @@ void addArcoPonderado(Grafo *g, int i, int j, float custo){
 float getCusto(Grafo *g, int i, int j){
 	int k;
 	Node *node_i = buscaNode(g,i);
-	
+
 	for(k=0; k < node_i->adj->size(); k++){
 		if(node_i->adj->at(k)->index == j){
 			return node_i->custo->at(k);
@@ -139,7 +103,7 @@ float getCusto(Grafo *g, int i, int j){
 
 
 void addArco(Grafo *g, int i, int j){
-	
+
 	Node *node_i = buscaNode(g, i);
 	Node *node_j = buscaNode(g, j);
 
@@ -157,14 +121,14 @@ void addArco(Grafo *g, int i, int j){
 }
 
 void addAresta(Grafo *g, int i, int j){
-	
+
 	addArco(g, i, j);
 	addArco(g, j, i);
 
 }
 
 vector<Node*>* verticesAdj(Grafo *g, int i){
-	
+
 	Node* node = buscaNode(g, i);
 	if (node != NULL){
 		return node->adj;
@@ -196,9 +160,9 @@ void imprimirGrafo(Grafo *g){
 }
 
 void removeArco(Grafo *g, int i, int j){
-	
+
 	Node *node_i = buscaNode(g, i);
-	
+
 	vector<Node*>::iterator it;
 	vector<float>::iterator it2;
 
@@ -223,269 +187,6 @@ void removeAresta(Grafo* g, int i, int j){
 
 }
 
-//PRIMEIRA PARTE DO CÓDIGO DA AULA DO DIA 22/01/2018 - BFS(BUSCA EM LARGURA)
-
-int bsf(Grafo *g, int s, int t){ //ONDE S EH O NO INICIAL
-	
-	deque<Node*> fila;
-	Node *aux;
-	int i;
-	
-	for(i=0; i < g->vertices.size(); i++){
-		g->vertices.at(i)->visited = 0;
-	}
-
-	aux = buscaNode(g, s);
-	
-	if(aux == NULL) return -1;
-	fila.push_back(aux);//PEGA O ULTIMO ELEMENTO DA FILA
-	
-	while(!fila.empty()){
-		aux = fila.front();//PEGA O PRIMEIRO ELEMENTO DA FILA
-		fila.pop_front();
-		aux->visited = 1;
-
-		if (aux->index == t)return 1;
-		//ITERANDO SOBRE OS ADJ E ADICIONANDO NA FILA		
-		for(i=0; i< aux->adj->size(); i++){
-			if(aux->adj->at(i)->visited == 0){
-				fila.push_back(aux->adj->at(i));
-			}		
-		}		
-				
-				
-			
-	}
-	return 0;
-}
-
-//FAZENDO A BUSCA POR PROFUNDIDADE
-int dfs(Grafo *g, int s, int t){ //ONDE S EH O NO INICIAL
-	
-	stack<Node*> stack;
-	Node *aux;
-	int i;
-	
-	for(i=0; i < g->vertices.size(); i++){
-		g->vertices.at(i)->visited = 0;
-	}
-
-	aux = buscaNode(g, s);
-	
-	if(aux == NULL) return -1;
-	stack.push(aux);
-	
-	while(!stack.empty()){
-		aux = stack.top();
-		stack.pop();
-		aux->visited = 1;
-
-		if (aux->index == t)return 1;
-		//ITERANDO SOBRE OS ADJ E ADICIONANDO NA FILA		
-		for(i=0; i< aux->adj->size(); i++){
-			if(aux->adj->at(i)->visited == 0){
-				stack.push(aux->adj->at(i));
-			}		
-		}		
-				
-				
-			
-	}
-	return 0;
-}
-//PROFUNDIDADE - VERSÃO RECURSIVA 
-void dfsRec(Grafo* g, int s, int t){
-	int i;
-	Node *aux = buscaNode(g,s);
-	aux->visited = 1;
-	if(aux->index != t){
-		for(i=0; i < aux->adj->size(); i++){
-			if(aux->adj->at(i)->visited == 0){
-				dfsRec(g, aux->adj->at(i)->index, t);
-			}
-		}
-	}
-}
-
-//PROFUNDIDADE - VERSÃO RECURSIVA - Aula 23/01
-int temCicloUtil(Grafo* g, Node *aux){
-	int i;
-	
-	
-	aux->recur = 1; //VERTICE AINDA NAO EXPLOROU TODOS OS FILHOS
-	aux->visited = 1;
-
-	for(i=0; i < aux->adj->size(); i++){
-		if(aux->adj->at(i)->recur == 1){
-			return 1;	
-		}else{
-			temCicloUtil(g, aux->adj->at(i));
-		 }
-	}
-	aux->recur = 0; //VERTICE EXPLOROU TODOS OS FILHOS
-	return 0;
-}
-
-int temCiclo(Grafo *g){
-	int i;
-	//ZERANDO A ESTRUTURA AUXILIAR (QUE VERIFICA SE O VÉRTICE ESTÁ OU NÃO NA RECURSÃO)
-	for(i=0; i < g->vertices.size();i++){
-		g->vertices.at(i)->recur = 0;
-	}	
-	//CHAMA A FUNÇÃO PARA VERIFICAR CICLIO A PARTIR DE CADA VÉRTICE DO GRAFO.
-	for(i=0; i < g->vertices.size();i++){
-		if(temCicloUtil(g, g->vertices.at(i))) return 1;
-	}
-	return 0;
-		
-}
-
-void caminhoMinimo(Grafo *g, int s){ //ONDE S EH O NO INICIAL
-	
-	deque<Node*> fila;
-	Node *aux;
-	int i;
-	
-	for(i=0; i < g->vertices.size(); i++){
-		g->vertices.at(i)->visited = 0;
-		g->vertices.at(i)->prev = -1;
-		g->vertices.at(i)->dist = 0;
-	}
-
-	aux = buscaNode(g, s);
-	
-	if(aux == NULL) return;
-
-	fila.push_back(aux);//PEGA O ULTIMO ELEMENTO DA FILA
-	
-	while(!fila.empty()){
-		aux = fila.front();//PEGA O PRIMEIRO ELEMENTO DA FILA
-		fila.pop_front();
-		aux->visited = 1;
-
-		//ITERANDO SOBRE OS ADJ E ADICIONANDO NA FILA		
-		for(i=0; i< aux->adj->size(); i++){
-			if(aux->adj->at(i)->visited == 0){
-				aux->adj->at(i)->dist = aux->dist + 1;
-				aux->adj->at(i)->prev = aux->prev;
-				fila.push_back(aux->adj->at(i));
-			}		
-		}		
-						
-	}
-}
-
-void posOrdemGrafo(Grafo *g, int s, stack<int> *stack){
-//VERTICE S = 0;
-	int i;
-	Node *aux = buscaNode(g, s);
-	aux->visited = 1;
-	
-	for(i=0; i< aux->adj->size(); i++){
-		if(aux->adj->at(i)->visited == 0){
-			posOrdemGrafo(g, aux->adj->at(i)->index, stack);
-		}
-	}
-	stack->push(s);	
-}
-
-Grafo* transporGrafo(Grafo *g){
-	int i, j;
-	Grafo *grafoTranposto = new Grafo;
-	
-	for(i=0; i < g->vertices.size(); i++){
-		for(j=0; j < g->vertices.at(i)->adj->size(); j++){
-			//CRIA OS VÉRTICES INVERTIDOS
-			addArco(grafoTranposto, g->vertices.at(i)->adj->at(j)->index, g->vertices.at(i)->index);
-		}
-	}
-	return grafoTranposto;	
-
-}
-
-void dfsRec2(Grafo* g, int s, vector<int> *vertices){
-	int i;
-	Node *aux = buscaNode(g,s);
-	aux->visited = 1;
-	vertices->push_back(s);
-	
-		for(i=0; i < aux->adj->size(); i++){
-			if(aux->adj->at(i)->visited == 0){
-				dfsRec2(g, aux->adj->at(i)->index, vertices);
-			}
-		}
-}
-
-
-
-void componentesConexos(Grafo *g, int s){
-	
-	Grafo *grafoTransposto;
-	int indiceNo, i, j;
-	Node *nodeAtual;
-
-	vector<vector<int>*> componentesConexos;
-	//ORDEM EM QUE EH PRECISO APLICAR A BUSCA EM PROFUNDIDADE
-	stack<int> *posOrdemPilha = new stack<int>;
-	posOrdemGrafo (g, s, posOrdemPilha);
-	
-	//CRIA O GRAFO TRANSPOSTO
-	grafoTransposto = transporGrafo(g);
-	
-	while(!posOrdemPilha->empty()){
-		indiceNo = posOrdemPilha->top();
-		posOrdemPilha->pop();
-	
-		nodeAtual = buscaNode(grafoTransposto, indiceNo);
-
-		if(nodeAtual->visited == 0){
-			vector<int> *vertices = new vector<int>;
-			dfsRec2(grafoTransposto, indiceNo, vertices);	
-			componentesConexos.push_back(vertices);
-		}
-	} 	
-	for(i=0; i<componentesConexos.size(); i++){
-		printf("Componente %d: \n", i);
-		for(j=0; j<componentesConexos.at(i)->size(); j++){
-			printf(" %d", componentesConexos.at(i)->at(j));
-		}
-		printf("\n");
-	}
-}
-
-void ordenacaoTopologicaUtil(Grafo *g, Node *aux, stack<int> *pilha){
-
-	int i;
-
-	if(aux->visited == 0){
-		aux->visited = 1;	
-		for(i=0; i< aux->adj->size(); i++){
-			if(aux->adj->at(i)->visited == 0){
-				ordenacaoTopologicaUtil(g, aux->adj->at(i), pilha);
-			}
-		}
-		pilha->push(aux->index);	
-	}
-}
-
-void ordenacaoTopologica(Grafo *g){
-	
-	int i;
-	stack<int> *pilha = new stack<int>;
-
-	//ZERA A ESTRUTURA
-	for(i=0; i<g->vertices.size(); i++){
-		g->vertices.at(i)->visited = 0;
-	}
-	//CHAMA A FUNCAO PARA TODOS OS VERTICES DO GRAFO
-	for(i=0; i< g->vertices.size(); i++){
-		ordenacaoTopologicaUtil(g, g->vertices.at(i), pilha);
-	}
-	while(!pilha->empty()){
-		printf("%d \n", pilha->top());
-		pilha->pop();
-	}
-}
 
 Node* obterMenorEstimativaDistancia(vector<Node*> *verticesNaoVisitados){
 
@@ -516,11 +217,11 @@ void dijkstra(Grafo *g, int s){
 	Node *noAdj;
 	//LISTA CONTENDO TODOS OS VERTICES DO GRAFO
 	vector<Node*> *verticesNaoVisitados = new vector<Node*>;
-	
+
 	//INICIALIZAÇÃO DE ACORDO COM O ALGORITMO
 	for(i=0; i < g->vertices.size(); i++){
 		if(g->vertices.at(i)->index == s){
-			g->vertices.at(i)->dist = 0;	
+			g->vertices.at(i)->dist = 0;
 		}else{
 				g->vertices.at(i)->dist = INT_MAX;	//se aqui colocamos todas as dist como int max
 		}
@@ -528,39 +229,46 @@ void dijkstra(Grafo *g, int s){
 
 		verticesNaoVisitados->push_back(g->vertices.at(i));	// e aqui colocamos esses vertices no não visitados
 	}
+
+
 	//ENQUANTO A LISTA DE VÉRTICES NAO VISITADOS NAO FOR VAZIA
 	while(!verticesNaoVisitados->empty()){
 		//OBTENHO O MENOR
+
 		noAtual = obterMenorEstimativaDistancia(verticesNaoVisitados);
+
 		noAtual->visited = 1;
 
 		//ATUALIZA A ESTIMATIVA DE DISTANCIA PARA TODOS OS ADJ
 		for (i=0; i < noAtual->adj->size(); i++){
 
 			noAdj = noAtual->adj->at(i);
-			
+
 			if(noAdj->dist > noAtual->dist
 											+ getCusto(g, noAtual->index, noAdj->index)){
 				noAdj->dist = noAtual->dist
 											+ getCusto(g, noAtual->index, noAdj->index);
-				
+
 				noAdj->prev = noAtual->index;
 			}
+
 		}
+
 	}
+
 }
 
 Caminhos* criaCaminhos(){
 	Caminhos *A = (Caminhos*) malloc (sizeof(Caminhos));
-	A->c = new deque< deque<int>* >; 
+	A->c = new deque< deque<int>* >;
 	A->custos = new deque<float>;
 	return A;
 
 
 }
-	
+
 Caminhos* kCaminhos(Grafo *g, int s, int t, int K){
-	
+
 	int k, i, j, l, cont, ind, custin;
 	float menor;
 	Caminhos *A = criaCaminhos();
@@ -573,25 +281,25 @@ Caminhos* kCaminhos(Grafo *g, int s, int t, int K){
 	deque<float>::iterator it2;
 	dijkstra(g, s);
 	p=buscaNode(g, t);
-	
+
 	cont=0;
 	do{
 		caminho->push_front(p->index);
 		p=buscaNode(g, p->prev);
 		cont++;
 	}while(p->index!=s);
-	
+
 	A->c->push_front(caminho);
-	
+
 	k=1;
 	while(k<K){
-	
+
 		i=0;
 		while(i<cont-2){
 			spurNode=buscaNode(g, A->c->at(k-1)->at(i));
 			rootPath->at(0)=A->c->at(k-1)->at(0);
 			rootPath->at(1)=A->c->at(k-1)->at(i);
-			
+
 			for(j=0;j<A->c->size();j++){
 				if(rootPath->at(0)==A->c->at(j)->at(0) && rootPath->at(1)==A->c->at(j)->at(i)){
 					p=buscaNode(g, i);
@@ -602,54 +310,54 @@ Caminhos* kCaminhos(Grafo *g, int s, int t, int K){
 					removeArco(g, i, i+1);
 				}
 			}
-			
+
 			if(rootPath->at(0)!=spurNode->index){
 				p=buscaNode(g, rootPath->at(0));
 				p->visited=1;
-			
+
 			}
 			if(rootPath->at(1)!=spurNode->index){
 				p=buscaNode(g, rootPath->at(1));
 				p->visited=1;
 			}
-			
+
 			dijkstra(g, spurNode->index);
 			caminho->clear();
 			p=buscaNode(g, t);
-			
-			
+
+
 			do{
 				caminho->push_front(p->index);
 				p=buscaNode(g, p->prev);
 			}while(p->index!=s);
-			
+
 			caminho->push_front(rootPath->at(1));
 			caminho->push_front(rootPath->at(0));
-			
+
 			B->c->push_back(caminho);
 			B->custos->push_back(buscaNode(g, t)->dist);
-			
+
 			if(rootPath->at(0)!=spurNode->index){
 				p=buscaNode(g, rootPath->at(0));
 				p->visited=0;
-			
+
 			}
 			if(rootPath->at(1)!=spurNode->index){
 				p=buscaNode(g, rootPath->at(1));
 				p->visited=0;
 			}
-			
+
 			for(j=0;j<A->c->size();j++){
 				if(rootPath->at(0)==A->c->at(j)->at(0) && rootPath->at(1)==A->c->at(j)->at(i)){
 					addArcoPonderado(g, i, i+1, custin);
-					
-					
+
+
 					}
 				}
 			}
-		
+
 		if(B->c->empty()) break;
-		
+
 		menor=9999999;
 		ind=0;
 		for(j=0; j<B->custos->size();j++){
@@ -673,40 +381,35 @@ Caminhos* kCaminhos(Grafo *g, int s, int t, int K){
 		}
 
 	}
-	
+
 	}
 	return A;
-	}
+}
 
-	
 
-int main(){
-	
-	Grafo *g = new Grafo();
-	Caminhos *A;
-	int i, a, b, capacidade;
-	float cust;
-	/*for(i=0;i<114;i++){
-		scanf("%d %d %d %f", &a, &b, &capacidade, &cust);
-		addArcoPonderado(g, a, b, cust);
-	
-	
-	}*/
-	//addArcoPonderado(g, 0, 1, 1);
-	addArcoPonderado(g, 1, 2, 2);
-	addArcoPonderado(g, 2, 3, 2);
-	addArcoPonderado(g, 1, 3, 1);
-	
-	imprimirGrafo(g);
-	A=kCaminhos(g, 1, 3, 2);
-	
-	
-	//dijkstra(g, 0);
-	printf("%f \n", buscaNode(g, 3)->dist);
-	for(i=0;i<A->c->size();i++){
-		for(a=0;a<A->c->at(i)->size();a++)
-			printf("%d ", A->c->at(i)->at(a));
+//GERA A ROTA PARA DOIS NODOS QUAISQUER;
+deque<Node*> * achaRota(Grafo* g, int i, int j){
+
+	deque<Node*> *caminho = new deque<Node*>;
+	Node* node_i = buscaNode(g, i); //VERITIFCA SE OS NODOS EXISTEM;
+	Node* node_j = buscaNode(g, j); //VERIFICA SE OS NODOS EXISTEM;
+	Node* node_prev;
+
+	if(node_i != NULL && node_j != NULL){
+
+	//SE AMBOS EXISTIREM...
+	//FAÇA...
+	  node_prev = buscaNode(g, node_j->prev); //PEGA O NODO ANTERIOR;
+		while(node_prev != NULL){
+			caminho->push_front(node_prev); //COLOCA O ANTERIOR NO CAMINHO;
+			node_prev = buscaNode(g, node_prev->prev);
+		}
+		caminho->push_back(node_j);
+
 	}
-	//ordenacaoTopologica(g);	
-	
+	else{
+		printf("ROTA INVALIDA!\n");
+		return NULL;
+	}
+	return caminho;
 }
