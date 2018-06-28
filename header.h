@@ -18,6 +18,7 @@ struct node{
 	int visited;
 	float dist;//DISTANCIA MINIMA ENTRE A ORIGEM ATE OS PONTOS
 	int prev;//ANTERIOR
+	int capacidade;
 	vector<float> *custo;
 	vector<struct node*> *adj;
 };
