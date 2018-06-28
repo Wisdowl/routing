@@ -118,8 +118,10 @@ void addArcoPonderado(Grafo *g, int i, int j, float custo){
 	}
 
 	node_i->adj->push_back(node_j);
+	//node_j->adj->push_back(node_i);
 	node_i->custo->push_back(custo);
-
+	//node_j->custo->push_back(custo);
+	
 	g->m += 1;
 
 }
@@ -524,15 +526,19 @@ void dijkstra(Grafo *g, int s){
 		}else{
 				g->vertices.at(i)->dist = INT_MAX;	//se aqui colocamos todas as dist como int max
 		}
+		
+		if(g->vertices.at(i)->visited!=1){
 		g->vertices.at(i)->prev = -1;
-
+		
 		verticesNaoVisitados->push_back(g->vertices.at(i));	// e aqui colocamos esses vertices no não visitados
+	}
 	}
 	//ENQUANTO A LISTA DE VÉRTICES NAO VISITADOS NAO FOR VAZIA
 	while(!verticesNaoVisitados->empty()){
 		//OBTENHO O MENOR
 		noAtual = obterMenorEstimativaDistancia(verticesNaoVisitados);
-		noAtual->visited = 1;
+		
+	
 
 		//ATUALIZA A ESTIMATIVA DE DISTANCIA PARA TODOS OS ADJ
 		for (i=0; i < noAtual->adj->size(); i++){
@@ -572,31 +578,51 @@ Caminhos* kCaminhos(Grafo *g, int s, int t, int K){
 	deque< deque<int>* >::iterator it;
 	deque<float>::iterator it2;
 	dijkstra(g, s);
+	
+	for(j=0; j <g->vertices.size(); j++)
+	g->vertices.at(j)->visited=0;
+	
+
 	p=buscaNode(g, t);
 	
 	cont=0;
 	do{
+		
 		caminho->push_front(p->index);
+		//printf("%d a \n", p->index);
 		p=buscaNode(g, p->prev);
 		cont++;
 	}while(p->index!=s);
+	caminho->push_front(p->index);
 	
 	A->c->push_front(caminho);
+	
+	for(i=0;i<A->c->size();i++){
+		for(j=0;j<A->c->at(i)->size();j++){
+			printf("%d ", A->c->at(i)->at(j));
+		}printf("\n");
+	
+	
+	}printf("\n");
+	
 	
 	k=1;
 	while(k<K){
 	
 		i=0;
-		while(i<cont-2){
+		while(i < (A->c->at(k-1)->size())-2){
+			
 			spurNode=buscaNode(g, A->c->at(k-1)->at(i));
-			rootPath->at(0)=A->c->at(k-1)->at(0);
-			rootPath->at(1)=A->c->at(k-1)->at(i);
+			
+			rootPath->push_back(A->c->at(k-1)->at(0));
+			
+			rootPath->push_back(A->c->at(k-1)->at(i));
 			
 			for(j=0;j<A->c->size();j++){
 				if(rootPath->at(0)==A->c->at(j)->at(0) && rootPath->at(1)==A->c->at(j)->at(i)){
-					p=buscaNode(g, i);
+					p=buscaNode(g, i+1);
 					for(j=0;j<p->adj->size();j++){
-						if(p->adj->at(i)->index==i+1)
+						if(p->adj->at(j)->index==i+1)
 							custin=p->custo->at(j);
 					}
 					removeArco(g, i, i+1);
@@ -613,15 +639,21 @@ Caminhos* kCaminhos(Grafo *g, int s, int t, int K){
 				p->visited=1;
 			}
 			
+
 			dijkstra(g, spurNode->index);
+			//printf("%d b\n", spurNode->index);
 			caminho->clear();
 			p=buscaNode(g, t);
 			
-			
-			do{
-				caminho->push_front(p->index);
+			caminho->push_front(p->index);
+			while(p->prev!=-1){
+				
+				//printf("%d c\n", p->index);
+				//printf("%d d\n", p->prev);
 				p=buscaNode(g, p->prev);
-			}while(p->index!=s);
+				caminho->push_front(p->index);
+				
+			}
 			
 			caminho->push_front(rootPath->at(1));
 			caminho->push_front(rootPath->at(0));
@@ -646,12 +678,15 @@ Caminhos* kCaminhos(Grafo *g, int s, int t, int K){
 					
 					}
 				}
+			i+=1;
+			rootPath->clear();
 			}
 		
 		if(B->c->empty()) break;
 		
-		menor=9999999;
+		menor=999999;
 		ind=0;
+		
 		for(j=0; j<B->custos->size();j++){
 			if(B->custos->at(j)<menor){
 				menor=B->custos->at(j);
@@ -664,16 +699,18 @@ Caminhos* kCaminhos(Grafo *g, int s, int t, int K){
 		//B->c->erase(ind);
 		//it2=ind;
 		//B->custos->erase(it2);
-		for(it = B->c->begin(), it2 = B->custos->begin(), t=0; it != B->c->end(); it++, it2++, l++){
+		/*for(it = B->c->begin(), it2 = B->custos->begin(), t=0; it != B->c->end(); it++, it2++, l++){
 
-		if(l == ind) {
-			B->c->erase(it);
-			B->custos->erase(it2);
-			break;
-		}
+			if(l == ind) {
+				B->c->erase(it);
+				B->custos->erase(it2);
+				break;
+			}
 
-	}
-	
+		}*/
+		B->c->clear();
+		B->custos->clear();
+	k++;
 	}
 	return A;
 	}
@@ -684,29 +721,32 @@ int main(){
 	
 	Grafo *g = new Grafo();
 	Caminhos *A;
-	int i, a, b, capacidade;
+	int i, a, b, capacidade, j;
 	float cust;
-	/*for(i=0;i<114;i++){
+	for(i=0;i<114;i++){
 		scanf("%d %d %d %f", &a, &b, &capacidade, &cust);
 		addArcoPonderado(g, a, b, cust);
 	
 	
-	}*/
+	}
 	//addArcoPonderado(g, 0, 1, 1);
-	addArcoPonderado(g, 1, 2, 2);
-	addArcoPonderado(g, 2, 3, 2);
-	addArcoPonderado(g, 1, 3, 1);
+	//addArcoPonderado(g, 1, 3, 1);
+	//addArcoPonderado(g, 2, 3, 2);
+	//addArcoPonderado(g, 1, 2, 1);
 	
 	imprimirGrafo(g);
-	A=kCaminhos(g, 1, 3, 2);
+	A=kCaminhos(g, 2, 4, 2);
 	
-	
-	//dijkstra(g, 0);
-	printf("%f \n", buscaNode(g, 3)->dist);
 	for(i=0;i<A->c->size();i++){
-		for(a=0;a<A->c->at(i)->size();a++)
-			printf("%d ", A->c->at(i)->at(a));
-	}
+		for(j=0;j<A->c->at(i)->size();j++){
+			printf("%d ", A->c->at(i)->at(j));
+		}printf("\n");
+	
+	
+	}printf("\n");
+	//dijkstra(g, 0);
+	
+	
 	//ordenacaoTopologica(g);	
 	
 }
