@@ -7,7 +7,7 @@ using namespace std;
 int main(){
 
 	Grafo *g = new Grafo();
-	deque<Node*> *caminhos = new deque<Node*>;
+	deque<Node*> caminhos = new deque<Node*>;
 	int i, a, b, capacidade;
 	float custo;
 
@@ -16,10 +16,11 @@ int main(){
 		addArcoPonderado(g, a, b, custo);
 	}
 
-	//dijkstraMedia(g);
+	dijkstraMedia(g);
 	//dijkstraMediaNAO_ADJ(g, caminhos);
-	//Node* node_source = g->vertices.adj->at(0);
-	//cout << node_source << endl;
+	Node* node_source = g->vertices.adj->at(0);
+	cout << node_source << endl;
+
 	/*addArcoPonderado(g, 0, 1, 12);
 	addArcoPonderado(g, 1, 0, 12);
 

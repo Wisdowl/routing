@@ -197,7 +197,7 @@ Node* obterMenorEstimativaDistancia(vector<Node*> *verticesNaoVisitados){
 
 	//OBTENHO A MENOR ESTIMATIVA DE DISTANCIA ENTRE OS NÓS NAO VISITADOS
 	for(i=0; i < verticesNaoVisitados->size(); i++){
-		if(verticesNaoVisitados->at(i)->dist < menorDist){		// como aqui testamos qual o menor se todos são intmax?
+		if(verticesNaoVisitados->at(i)->dist < menorDist){
 			menorDist = verticesNaoVisitados->at(i)->dist;
 			menorNode = verticesNaoVisitados->at(i);
 		}
@@ -215,6 +215,7 @@ void dijkstra(Grafo *g, int s){
 	int i;
 	Node *noAtual;
 	Node *noAdj;
+
 	//LISTA CONTENDO TODOS OS VERTICES DO GRAFO
 	vector<Node*> *verticesNaoVisitados = new vector<Node*>;
 
@@ -223,11 +224,11 @@ void dijkstra(Grafo *g, int s){
 		if(g->vertices.at(i)->index == s){
 			g->vertices.at(i)->dist = 0;
 		}else{
-				g->vertices.at(i)->dist = INT_MAX;	//se aqui colocamos todas as dist como int max
+				g->vertices.at(i)->dist = INT_MAX; //aqui colocamos todas as dist como int max
 		}
 		g->vertices.at(i)->prev = -1;
 
-		verticesNaoVisitados->push_back(g->vertices.at(i));	// e aqui colocamos esses vertices no não visitados
+		verticesNaoVisitados->push_back(g->vertices.at(i)); //e aqui colocamos esses vertices no não visitados
 	}
 
 
@@ -244,11 +245,8 @@ void dijkstra(Grafo *g, int s){
 
 			noAdj = noAtual->adj->at(i);
 
-			if(noAdj->dist > noAtual->dist
-											+ getCusto(g, noAtual->index, noAdj->index)){
-				noAdj->dist = noAtual->dist
-											+ getCusto(g, noAtual->index, noAdj->index);
-
+			if(noAdj->dist > noAtual->dist + getCusto(g, noAtual->index, noAdj->index)){
+				noAdj->dist = noAtual->dist + getCusto(g, noAtual->index, noAdj->index);
 				noAdj->prev = noAtual->index;
 			}
 
@@ -422,7 +420,7 @@ void dijkstraMedia(Grafo* g, deque<Node*> *caminhos){
 	float avgPath = 0.0;
 	int source = g->vertices.front()->index;
 
-	for(source; source < g->vertices.size(); source++){ ////
+	for(source; source < g->vertices.size(); source++){
 		Node* node_source = NULL;
 		dijkstra(g, source); //EXECUTA DIJKSTRA PARA UM NODO EXISTENTE;
 
@@ -448,7 +446,7 @@ void dijkstraMedia(Grafo* g, deque<Node*> *caminhos){
 	}
 }
 
-/*void dijkstraMediaNAO_ADJ(Grafo* g, deque<Node*> *caminhos){
+void dijkstraMediaNAO_ADJ(Grafo* g, deque<Node*> *caminhos){
 
 	float avgDist = 0.0;
 	float avgPath = 0.0;
@@ -460,12 +458,15 @@ void dijkstraMedia(Grafo* g, deque<Node*> *caminhos){
 		dijkstra(g, source);
 
 		for(int i = 0; i < g->vertices.size(); i++){
-			printf("AQUI AQUI\n");
-			if(i != source && i != node_source->adj->at(i)->index){
+			if(i != source){
+				for(int j = 0; i < g->vertices.adj->size(); j++){
+					if(i != node_source->adj->at(i)->index){
+						avgDist += g->vertices.at(i)->dist; //ARMAZENA A DISTANCIA TOTAL ATE OUTRO NODO "i";
+						caminhos = achaRota(g, source, i); //ACHA ROTA PARA TODOS ADJACENTES;
+						avgPath += caminhos->size(); //ARMAZENA O TAMANHO DO CAMINHO (EM # DE NODOS);
+					}
+				}
 
-				avgDist += g->vertices.at(i)->dist; //ARMAZENA A DISTANCIA TOTAL ATE OUTRO NODO "i";
-				caminhos = achaRota(g, source, i); //ACHA ROTA PARA TODOS ADJACENTES;
-				avgPath += caminhos->size(); //ARMAZENA O TAMANHO DO CAMINHO (EM # DE NODOS);
 			}
 		}
 
@@ -481,4 +482,4 @@ void dijkstraMedia(Grafo* g, deque<Node*> *caminhos){
 
 
 
-}*/
+}

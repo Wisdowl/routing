@@ -28,7 +28,6 @@ struct grafo{
 		int m;
 		vector<Node*> vertices;
 };
-
 typedef struct grafo Grafo;
 
 struct caminhos{
@@ -37,7 +36,7 @@ struct caminhos{
 	deque<float> *custos;
 	int tam;
 
-
-};typedef struct caminhos Caminhos;
+};
+typedef struct caminhos Caminhos;
 
 #endif
