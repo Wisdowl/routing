@@ -527,6 +527,9 @@ void dijkstra(Grafo *g, int s){
 				g->vertices.at(i)->dist = INT_MAX;	//se aqui colocamos todas as dist como int max
 		}
 		
+		if(g->vertices.at(i)->visited==1)
+		printf("%d vaikarai \n", g->vertices.at(i)->index);
+		
 		if(g->vertices.at(i)->visited!=1){
 		g->vertices.at(i)->prev = -1;
 		
@@ -564,6 +567,19 @@ Caminhos* criaCaminhos(){
 
 
 }
+void coloca(Caminhos *x, deque<int> *caminho){
+	
+	int i;
+	deque<int> *novo = new deque<int>;
+	for(i=0;i<caminho->size();i++){
+		novo->push_back(caminho->at(i));
+	}
+	
+	x->c->push_back(novo);
+
+
+}
+
 	
 Caminhos* kCaminhos(Grafo *g, int s, int t, int K){
 	
@@ -595,11 +611,11 @@ Caminhos* kCaminhos(Grafo *g, int s, int t, int K){
 	}while(p->index!=s);
 	caminho->push_front(p->index);
 	
-	A->c->push_front(caminho);
+	coloca(A, caminho);
 	
-	for(i=0;i<A->c->size();i++){
-		for(j=0;j<A->c->at(i)->size();j++){
-			printf("%d ", A->c->at(i)->at(j));
+	for(l=0;l<A->c->size();l++){
+		for(j=0;j<A->c->at(l)->size();j++){
+			printf("%d ", A->c->at(l)->at(j));
 		}printf("\n");
 	
 	
@@ -621,9 +637,9 @@ Caminhos* kCaminhos(Grafo *g, int s, int t, int K){
 			for(j=0;j<A->c->size();j++){
 				if(rootPath->at(0)==A->c->at(j)->at(0) && rootPath->at(1)==A->c->at(j)->at(i)){
 					p=buscaNode(g, i+1);
-					for(j=0;j<p->adj->size();j++){
-						if(p->adj->at(j)->index==i+1)
-							custin=p->custo->at(j);
+					for(l=0;l<p->adj->size();l++){
+						if(p->adj->at(l)->index==i+1)
+							custin=p->custo->at(l);
 					}
 					removeArco(g, i, i+1);
 				}
@@ -639,27 +655,58 @@ Caminhos* kCaminhos(Grafo *g, int s, int t, int K){
 				p->visited=1;
 			}
 			
+	
+			
+			
+			
+			
+			
 
 			dijkstra(g, spurNode->index);
 			//printf("%d b\n", spurNode->index);
 			caminho->clear();
 			p=buscaNode(g, t);
 			
+			for(l=0;l<A->c->size();l++){
+		for(j=0;j<A->c->at(l)->size();j++){
+			printf("%d ", A->c->at(l)->at(j));
+		}printf("\n");
+	
+	
+	}printf("vaibrasiliam\n");
+		
+		
+		
+			//caminho->push_front(p->index);
+		
+		for(l=0;l<A->c->size();l++){
+		for(j=0;j<A->c->at(l)->size();j++){
+			printf("%d ", A->c->at(l)->at(j));
+		}printf("\n");
+	
+	
+	}printf("vaiespanha\n");
+		
+		
+			do{	
 			caminho->push_front(p->index);
-			while(p->prev!=-1){
-				
-				//printf("%d c\n", p->index);
-				//printf("%d d\n", p->prev);
-				p=buscaNode(g, p->prev);
-				caminho->push_front(p->index);
-				
-			}
+			//printf("%d a \n", p->index);
+			p=buscaNode(g, p->prev);
+			//cont++;
+			}while(p->index!=spurNode->index);
+			caminho->push_front(p->index);
+			
+		
+			
+			
 			
 			caminho->push_front(rootPath->at(1));
 			caminho->push_front(rootPath->at(0));
 			
-			B->c->push_back(caminho);
+			coloca(B, caminho);
+			
 			B->custos->push_back(buscaNode(g, t)->dist);
+			
 			
 			if(rootPath->at(0)!=spurNode->index){
 				p=buscaNode(g, rootPath->at(0));
@@ -693,7 +740,8 @@ Caminhos* kCaminhos(Grafo *g, int s, int t, int K){
 				ind=j;
 			}
 		}
-		A->c->push_back(B->c->at(ind));
+		coloca(A, B->c->at(ind));
+		//A->c->push_back(B->c->at(ind));
 		A->custos->push_back(menor);
 		//it=ind;
 		//B->c->erase(ind);
@@ -735,8 +783,8 @@ int main(){
 	//addArcoPonderado(g, 1, 2, 1);
 	
 	imprimirGrafo(g);
-	A=kCaminhos(g, 2, 4, 2);
-	
+	A=kCaminhos(g, 1, 5, 2);
+	printf("vaititomanocu\n");
 	for(i=0;i<A->c->size();i++){
 		for(j=0;j<A->c->at(i)->size();j++){
 			printf("%d ", A->c->at(i)->at(j));
