@@ -213,6 +213,9 @@ void removeArco(Grafo *g, int i, int j){
 		}
 
 	}
+	
+	
+	
 
 	g->m -= 1;
 
@@ -528,7 +531,7 @@ void dijkstra(Grafo *g, int s){
 		}
 		
 		if(g->vertices.at(i)->visited==1)
-		printf("%d vaikarai \n", g->vertices.at(i)->index);
+		printf("%d vaik \n", g->vertices.at(i)->index);
 		
 		if(g->vertices.at(i)->visited!=1){
 		g->vertices.at(i)->prev = -1;
@@ -580,15 +583,56 @@ void coloca(Caminhos *x, deque<int> *caminho){
 
 }
 
+
+deque<float>* removeRoot(Grafo *g, Caminhos *A, deque<int> *rootPath, int i){
+	int a, b, cont;
+	deque<float>*custos = new deque<float>;
+	float custo;
+	
+	for(a=0;a<A->c->size();a++){
+		cont=0;
+		for(b=0;b<=i;b++){
+			if(A->c->at(a)->at(b)!=rootPath->at(b))
+				cont=1;
+		}
+		if(cont==0){
+			custos->push_back(A->c->at(a)->at(b));
+			custos->push_back(A->c->at(a)->at(b+1));
+			custo=getCusto(g, A->c->at(a)->at(b), A->c->at(a)->at(b+1));
+			custos->push_back(custo);
+			removeArco(g, A->c->at(a)->at(b), A->c->at(a)->at(b+1));
+		
+		}
+		
+	}
+	return custos;
+
+
+}
+
+float calculaDist(Grafo *g, deque<int> *caminho){
+	int i;
+	float custo=0;
+	
+	
+	for(i=0;i<caminho->size()-1;i++){
+		custo += getCusto(g, i, i+1);
+	
+	}
+	return custo;
+
+}
+
 	
 Caminhos* kCaminhos(Grafo *g, int s, int t, int K){
 	
-	int k, i, j, l, cont, ind, custin;
+	int f, k, i, j, l, cont, ind, custin;
 	float menor;
 	Caminhos *A = criaCaminhos();
 	Caminhos *B = criaCaminhos();
 	deque<int> *caminho = new deque<int>;
 	deque<int> *rootPath = new deque<int>;
+	deque<float> *guarda = new deque<float>;
 	Node *p;
 	Node *spurNode;
 	deque< deque<int>* >::iterator it;
@@ -612,80 +656,61 @@ Caminhos* kCaminhos(Grafo *g, int s, int t, int K){
 	caminho->push_front(p->index);
 	
 	coloca(A, caminho);
+	A->custos->push_back(calculaDist(g, caminho));
 	
-	for(l=0;l<A->c->size();l++){
-		for(j=0;j<A->c->at(l)->size();j++){
-			printf("%d ", A->c->at(l)->at(j));
-		}printf("\n");
-	
-	
-	}printf("\n");
 	
 	
 	k=1;
 	while(k<K){
 	
 		i=0;
-		while(i < (A->c->at(k-1)->size())-2){
+		while(i < A->c->at(k-1)->size()-2){
 			
 			spurNode=buscaNode(g, A->c->at(k-1)->at(i));
 			
-			rootPath->push_back(A->c->at(k-1)->at(0));
 			
-			rootPath->push_back(A->c->at(k-1)->at(i));
+			for(f=0;f<=i;f++){
+				rootPath->push_back(A->c->at(k-1)->at(f));
 			
-			for(j=0;j<A->c->size();j++){
-				if(rootPath->at(0)==A->c->at(j)->at(0) && rootPath->at(1)==A->c->at(j)->at(i)){
-					p=buscaNode(g, i+1);
-					for(l=0;l<p->adj->size();l++){
-						if(p->adj->at(l)->index==i+1)
-							custin=p->custo->at(l);
-					}
-					removeArco(g, i, i+1);
+			}
+			
+			guarda = removeRoot(g, A, rootPath, i);
+			
+			//custin=getCusto(g, i, i+1);
+			//removeArco(g, i, i+1);
+			
+			
+			
+			
+			for(f=0;f<rootPath->size();f++){
+			
+				if(rootPath->at(f)!=spurNode->index){
+					
+					p=buscaNode(g, rootPath->at(f));
+					p->visited=1;
+					
 				}
-			}
-			
-			if(rootPath->at(0)!=spurNode->index){
-				p=buscaNode(g, rootPath->at(0));
-				p->visited=1;
+					
 			
 			}
-			if(rootPath->at(1)!=spurNode->index){
-				p=buscaNode(g, rootPath->at(1));
-				p->visited=1;
-			}
-			
-	
 			
 			
 			
-			
-			
+			//exit(-1); 
 
 			dijkstra(g, spurNode->index);
+			
+			
 			//printf("%d b\n", spurNode->index);
 			caminho->clear();
 			p=buscaNode(g, t);
 			
-			for(l=0;l<A->c->size();l++){
-		for(j=0;j<A->c->at(l)->size();j++){
-			printf("%d ", A->c->at(l)->at(j));
-		}printf("\n");
-	
-	
-	}printf("vaibrasiliam\n");
 		
 		
 		
 			//caminho->push_front(p->index);
 		
-		for(l=0;l<A->c->size();l++){
-		for(j=0;j<A->c->at(l)->size();j++){
-			printf("%d ", A->c->at(l)->at(j));
-		}printf("\n");
-	
-	
-	}printf("vaiespanha\n");
+		
 		
 		
 			do{	
@@ -698,42 +723,48 @@ Caminhos* kCaminhos(Grafo *g, int s, int t, int K){
 			
 		
 			
+			for(f=rootPath->size()-1;f>0;f--){
+				caminho->push_front(rootPath->at(f));
 			
+			}
 			
-			caminho->push_front(rootPath->at(1));
-			caminho->push_front(rootPath->at(0));
+				
+			
 			
 			coloca(B, caminho);
 			
-			B->custos->push_back(buscaNode(g, t)->dist);
+			B->custos->push_back(calculaDist(g, caminho));
 			
+			for(f=0;f<rootPath->size();f++){
 			
-			if(rootPath->at(0)!=spurNode->index){
-				p=buscaNode(g, rootPath->at(0));
-				p->visited=0;
-			
-			}
-			if(rootPath->at(1)!=spurNode->index){
-				p=buscaNode(g, rootPath->at(1));
-				p->visited=0;
-			}
-			
-			for(j=0;j<A->c->size();j++){
-				if(rootPath->at(0)==A->c->at(j)->at(0) && rootPath->at(1)==A->c->at(j)->at(i)){
-					addArcoPonderado(g, i, i+1, custin);
+				if(rootPath->at(f)!=spurNode->index){
 					
+					p=buscaNode(g, rootPath->at(f));
+					p->visited=0;
 					
-					}
 				}
-			i+=1;
-			rootPath->clear();
+					
+			
 			}
-		
-		if(B->c->empty()) break;
-		
+				
+			for(f=0;f<guarda->size();f+=3){
+				
+				custin=guarda->at(f);
+				
+				ind=guarda->at(f+1);
+				
+				addArcoPonderado(g, custin, ind, guarda->at(f+2));
+				
+			}
+			guarda->clear();
+			
+			i++;
+			rootPath->clear();
+			
+			}
+		if(B->c->empty()) break;	
 		menor=999999;
 		ind=0;
-		
 		for(j=0; j<B->custos->size();j++){
 			if(B->custos->at(j)<menor){
 				menor=B->custos->at(j);
@@ -747,9 +778,9 @@ Caminhos* kCaminhos(Grafo *g, int s, int t, int K){
 		//B->c->erase(ind);
 		//it2=ind;
 		//B->custos->erase(it2);
-		/*for(it = B->c->begin(), it2 = B->custos->begin(), t=0; it != B->c->end(); it++, it2++, l++){
+		/*for(it = B->c->begin(), it2 = B->custos->begin(), t=0; it != B->c->end(); it++, it2++, t++){
 
-			if(l == ind) {
+			if(t == ind) {
 				B->c->erase(it);
 				B->custos->erase(it2);
 				break;
@@ -783,12 +814,12 @@ int main(){
 	//addArcoPonderado(g, 1, 2, 1);
 	
 	imprimirGrafo(g);
-	A=kCaminhos(g, 1, 5, 2);
-	printf("vaititomanocu\n");
+	A=kCaminhos(g, 2, 5, 4);
+	printf("\n");
 	for(i=0;i<A->c->size();i++){
 		for(j=0;j<A->c->at(i)->size();j++){
 			printf("%d ", A->c->at(i)->at(j));
-		}printf("\n");
+		}printf("\t%f \n", A->custos->at(i));
 	
 	
 	}printf("\n");
